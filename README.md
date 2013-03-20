@@ -1,11 +1,13 @@
-lpd8806-ethernet
-================
+# LPD8806-Ethernet
 
-ethernet to lpd8806 arduino code
-For more info see: http://frack.nl/wiki/LPD8806-Lan
-We use the following libraries:
-https://github.com/adafruit/LPD8806
-http://ethershield.thiseldo.co.uk/df/dd3/enc28j60_8h_source.html
+Control your LPD8806 powered RGB flexistrip over the network.
 
-Compatible with Any arduino, lpd8806 based ledstrip and ECN28j60 lan module.
+## Hardware
+* LPD8806 RGB flexistrip (SPI, bit-banged)
+* ENC28J60 Ethernet module (SPI interface)
 
+## Libraries
+* Arduino SPI
+* https://github.com/jcw/ethercard
+
+To keep the memory footprint mimimal, the otherwise fantastic library by Adafruit to control the LPD8806 strip is not used. For all your other projects, you can find this library here: https://github.com/adafruit/LPD8806
