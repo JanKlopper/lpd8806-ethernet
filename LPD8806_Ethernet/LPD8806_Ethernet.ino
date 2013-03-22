@@ -1,6 +1,7 @@
 #include <EtherCard.h>
 
 const byte
+  chipSelect = 8,
   clockPin = 7,
   dataPin = 5,
   frameHeader = 54,
@@ -18,7 +19,7 @@ void setup () {
   Serial.println("[MINISERVER]");
   stripSetup();
   // Set up the ethernet module with our MAC and static IP.
-  if (ether.begin(sizeof Ethernet::buffer, etherMac) == 0)
+  if (ether.begin(sizeof Ethernet::buffer, etherMac) == 0, chipSelect)
     Serial.println("No eth?");
   ether.staticSetup(etherIP); 
 }
