@@ -25,7 +25,6 @@ For the LED-strip:
 The chip-select pin for the ENC28J60 is user configurable, as are the pins for the LED-strip. The other pins are the hardware SPI pins on the Arduino and cannot be changed.
 
 ## Libraries
-* Arduino SPI
 * https://github.com/jcw/ethercard
 
 To keep the memory footprint mimimal, the otherwise fantastic library by Adafruit to control the LPD8806 strip is not used. For all your other projects, you can find this library here: https://github.com/adafruit/LPD8806
