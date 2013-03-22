@@ -20,17 +20,16 @@ class LPD8806(object):
   def show(self):
     """Writes out all pixels to the ethernet listener."""
     output = []
-    try:
-      for led in range(self.led_count):
+    for led in range(self.led_count):
+      try:
         for channel in self.leds[led]:
           output.append(chr(channel + 65))
         print ''.join(output[-3:])
-    except KeyError:
-      # No color is defined, set the pixel to black
-      output.append('AAA')
-    t = telnetlib.Telnet(self.host, self.port)
-    t.write(''.join(output))
-    t.close()
+      except KeyError:
+        # No color is defined, set the pixel to black
+        output.append('AAA')
+    with telnetlib.Telnet(self.host, self.port) as tn:
+      tn.write(''.join(output))
 
 
 def colorChase(strip, r, g, b, delay=0.2):
