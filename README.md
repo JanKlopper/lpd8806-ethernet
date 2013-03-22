@@ -2,6 +2,8 @@
 
 Control your LPD8806 powered RGB LED-flexistrip over the network.
 
+The length of strip (number of LED's) you can successfully connect depends on the amount of RAM on the Arduino. For devices with 1kB RAM, up to 160 LED's can be connected. Devices with 2kB RAM or more can connect up to 480 LED's (all of these are RGB). On hardware with more RAM available, longer strands may still not work because Ethernet frames larger than 1500 bytes tend to get fragmented, and the network library likely doesn't handle that gracefully (though this is untested).
+
 ## Hardware
 * Any Arduino or compatible device with at least 1kB RAM (ATmega168 and up)
 * LPD8806 RGB flexistrip (SPI, bit-banged)
@@ -25,7 +27,6 @@ For the LED-strip:
 The chip-select pin for the ENC28J60 is user configurable, as are the pins for the LED-strip. The other pins are the hardware SPI pins on the Arduino and cannot be changed.
 
 ## Libraries
-* Arduino SPI
 * https://github.com/jcw/ethercard
 
 To keep the memory footprint mimimal, the otherwise fantastic library by Adafruit to control the LPD8806 strip is not used. For all your other projects, you can find this library here: https://github.com/adafruit/LPD8806
