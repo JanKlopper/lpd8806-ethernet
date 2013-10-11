@@ -6,8 +6,8 @@ const byte
   dataPin = 5,
   frameHeader = 54,
   // ethernet interface mac address, must be unique on the LAN
-  etherMac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31},
-  etherIP[] = {192, 168, 178, 16};
+  etherMac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x04},
+  etherIP[] = {192, 168, 178, 212};
 const int ledCount = 160;
 // Ethernet buffer receives 3 bytes per LED
 // and 54 bytes for the Ethernet frame itself.
