@@ -1,8 +1,6 @@
 #!/usr/bin/python2.7
 """ledstrip trough telnet-interface"""
 import telnetlib
-import time
-import random
 
 #custom imports
 import effects
@@ -26,7 +24,7 @@ class LPD8806(object):
       try:
         for channel in self.leds[led]:
           output.append(chr(channel + 65))
-        print ''.join(output[-3:])
+        #print ''.join(output[-3:])
       except KeyError:
         # No color is defined, set the pixel to black
         output.append('AAA')

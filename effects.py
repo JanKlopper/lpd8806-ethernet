@@ -1,6 +1,10 @@
 #!/usr/bin/python2.7
 """Various effects available for the lpd8806 ledstrip"""
 
+# Standard imports
+import time
+import random
+
 def colorChase(strip, r, g, b, delay=0.2):
   """Chase one dot down the full strip."""
   # Start by turning all pixels off:
