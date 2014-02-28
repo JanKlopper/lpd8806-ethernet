@@ -207,7 +207,7 @@ static void saveConfigPage(const char* data, BufferFiller& buf){
   
   byte etherIP[4];
   for(int i=0; i<4; i++){
-    if (ether.findKeyVal(data + 1, stringvalue , 3 , "ip"+i) > 0) { 
+    if (ether.findKeyVal(data + 1, stringvalue , 3 , String("ip"+String(i))) > 0) { 
       value = atoi(stringvalue);   // command to convert a string to number
       if ((value >= 0) & (value <= 255)) {
         etherIP[i] = value;
@@ -218,7 +218,7 @@ static void saveConfigPage(const char* data, BufferFiller& buf){
   
   byte mac[6];
   for(int i=0; i<6; i++){
-    if (ether.findKeyVal(data + 1, stringvalue , 3 , "mac"+i) > 0) { 
+    if (ether.findKeyVal(data + 1, stringvalue , 3 , String("mac"+String(i))) > 0) { 
       value = atoi(stringvalue);   // command to convert a string to number
       if ((value >= 0) & (value <= 255)) {
         mac[i] = value;
