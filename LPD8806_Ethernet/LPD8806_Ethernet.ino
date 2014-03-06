@@ -28,7 +28,7 @@ byte ledstep = 0;
 
 // Ethernet buffer receives 3 bytes per LED
 // and 54 bytes for the Ethernet frame itself.
-byte Ethernet::buffer[ledCount * 3 + frameHeader];
+byte Ethernet::buffer[700];//ledCount * 3 + frameHeader];
 static BufferFiller bfill;
 
 void setup () {
@@ -83,13 +83,14 @@ void loop () {
   if (pos) {
     bfill = ether.tcpOffset();
     char* data = (char *) Ethernet::buffer + pos;
-    Serial.println(data);
+
     if (strncmp("GET / ", data, 6) == 0){
       // Return home page
       homePage(bfill);      
       ether.httpServerReply(bfill.position());
-    } else if (strncmp("POST / ", data, 7) == 0){
-      saveConfigPage(data, bfill);    
+    } else if (strncmp("GET /c?", data, 7) == 0){
+      saveConfigPage(data, bfill);  
+      ether.httpServerReply(bfill.position());  
     } else {
       ledstep = 0;
       len -= frameHeader;
@@ -158,74 +159,67 @@ static void homePage(BufferFiller& buf){
   readIP(etherIP);
   byte mac[6];
   readMAC(mac);
-  buf.emit_p(PSTR("$F"
-                  "<title>LedController: $D</title>"                  
-                  "<form method='POST'>"
-                  "Ledtype: <select name='type'>"),
-             http_OK, 
-             ver);     
+  buf.emit_p(PSTR("$F"           
+                  "<form action='/c'>"
+                  "Ledtype: <select name=t>"),
+             http_OK);     
   // display all available led types
-  for(int i=0; i<sizeof(ledtypes); i++){
-    buf.emit_p(PSTR("<option value='%D' %S>$S"), 
+  for(int i=0; i<4; i++){
+    buf.emit_p(PSTR("<option value='$D' $S>$S"), 
                i, 
                (readLEDType()==i?"selected":""), 
                ledtypes[i]);
   }
-  buf.emit_p(PSTR("</select><br>Ipv4: "));
+  buf.emit_p(PSTR("</select><br>Ip:"));
   // output ipv address octets
   for(int i=0; i<4; i++){
-    buf.emit_p(PSTR("<input name='ip%D' value='$D' type='number' min='$D' max='255' maxlength='3'>"), (i+1), etherIP[i], (i==0?1:0));    
+    buf.emit_p(PSTR("<input name='i$D' value='$D'>"), i, etherIP[i]);    
   }
-  buf.emit_p(PSTR("<br>MAC: "));
+  buf.emit_p(PSTR("<br>MAC:"));
   // output ipv address octets
   for(int i=0; i<6; i++){
-    buf.emit_p(PSTR("<input name='mac%D' value='$D' type='number' min='0' max='255' maxlength='3'>"), (i+1), mac[i]);    
+    buf.emit_p(PSTR("<input name='m$D' value='$D'>"), i, mac[i]);    
   }
-  
+  buf.emit_p(PSTR("<br><input type='submit'></form>"));
   // show dhcp as enabled based on eeprom value
-  buf.emit_p(PSTR("<br>Use DHCP: <input type='checkbox' name='dhcp' value='true' %S>"
-                  "<br><input type='submit'></form><br>"
-                  "<a href='https://github.com/JanKlopper/lpd8806-ethernet'>Opensource software</a>"),
-                  (etherIP[0] == 0 || etherIP[0] == 255?"checked":""));
+  //buf.emit_p(PSTR("<br>Use DHCP: <input type='checkbox' name='dhcp' value='true' $F>"
+  //                "<br><input type='submit'></form>"),
+  //                (etherIP[0] == 0 || etherIP[0] == 255?"checked":""));
+}
+
+static int getIntArg(const char* data, const char* key, int value=255) {
+  char temp[10];
+  if (ether.findKeyVal(data + 5, temp, sizeof temp, key) > 0){
+    value = atoi(temp);
+  }
+  return value;
 }
 
 static void saveConfigPage(const char* data, BufferFiller& buf){
+  byte type = getIntArg(data, "t", -1);
+  if ((type >= 0) & (type <= 5)) {
+    setLEDType(type);
+  }
+    
+  byte newIP[4];
+  newIP[0] = getIntArg(data, "i0", -1);
+  newIP[1] = getIntArg(data, "i1", -1);
+  newIP[2] = getIntArg(data, "i2", -1);
+  newIP[3] = getIntArg(data, "i3", -1);      
+  setIP(newIP);
+  
+  byte newmac[6];
+  newmac[0] = getIntArg(data, "m0");
+  newmac[1] = getIntArg(data, "m1");
+  newmac[2] = getIntArg(data, "m2");
+  newmac[3] = getIntArg(data, "m3");
+  newmac[4] = getIntArg(data, "m4");
+  newmac[5] = getIntArg(data, "m5");
+  
+  setMAC(newmac);  
   buf.emit_p(PSTR("$F"
-                  "<title>LedController v$D</title>"
                   "Config saved"), 
-             http_OK, 
-             ver);
-
-  char* stringvalue;
-  byte value;
-  if (ether.findKeyVal(data + 1, stringvalue , 1, "type") > 0) { 
-    value = atoi(stringvalue);   // command to convert a string to number
-    if ((value >= 0) & (value <= 5)) {
-       setLEDType(value);
-    }
-  }
-  
-  byte etherIP[4];
-  for(int i=0; i<4; i++){
-    if (ether.findKeyVal(data + 1, stringvalue , 3 , String("ip"+String(i))) > 0) { 
-      value = atoi(stringvalue);   // command to convert a string to number
-      if ((value >= 0) & (value <= 255)) {
-        etherIP[i] = value;
-      }
-    }
-  }
-  setIP(etherIP);
-  
-  byte mac[6];
-  for(int i=0; i<6; i++){
-    if (ether.findKeyVal(data + 1, stringvalue , 3 , String("mac"+String(i))) > 0) { 
-      value = atoi(stringvalue);   // command to convert a string to number
-      if ((value >= 0) & (value <= 255)) {
-        mac[i] = value;
-      }
-    }
-  }
-  setMAC(mac);  
+             http_OK);
 }
 
 // led strip functions
