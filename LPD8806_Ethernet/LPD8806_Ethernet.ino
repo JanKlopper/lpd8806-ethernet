@@ -36,6 +36,8 @@ void setup () {
   Serial.println("[ledserver]");
   
   ledType = readLEDType();
+  Serial.print("led type: ");
+  Serial.println(ledtypes[ledType]);
   stripSetup(ledType);
   // Set up the ethernet module with our MAC and static IP.
   byte mac[6];
@@ -83,9 +85,9 @@ void loop () {
   if (pos) {
     bfill = ether.tcpOffset();
     char* data = (char *) Ethernet::buffer + pos;
-
     if (strncmp("GET / ", data, 6) == 0){
       // Return home page
+      Serial.println("homepage");
       homePage(bfill);      
       ether.httpServerReply(bfill.position());
     } else if (strncmp("GET /c?", data, 7) == 0){
