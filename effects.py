@@ -40,34 +40,33 @@ def rainbow(strip):
   """Cycles all LED's on the strip through the full color wheel."""
   for angle in range(384):
     for led in range(strip.led_count):
-      color = wheel((led + angle) % 384)
-      strip.setPixelColor(led, *color)
+      # We use each pixel as a fraction of the full 384-color wheel
+      # (thats the led / strip.led_count() part)
+      # Then add in the angle which makes the colors go around per pixel
+      # the % 384 is to make the wheel cycle around    
+      colors = wheel( ((led * 384 / strip.led_count) + angle) % 384)
+      strip.setPixelColor(led, *colors)
     strip.show()
 
 def rainbowCycle(strip, repeats=5):
   """Perform a quick rainbow cycle"""
-  for _repeat in range(repeats):
-    for angle in range(384):
-      for led in range(strip.led_count):
-        # We use each pixel as a fraction of the full 384-color wheel
-        # (thats the led / strip.led_count() part)
-        # Then add in the angle which makes the colors go around per pixel
-        # the % 384 is to make the wheel cycle around
-        colors = wheel( ((led * 384 / strip.led_count) + angle) % 384)
-        strip.setPixelColor(led, *colors)
-      strip.show() # write all the pixels out
+  if repeats > 0: 
+    for _repeat in range(repeats):
+      rainbow(strip)
+  else:
+    while True:
+      rainbow(strip)
 
-def color(strip, red, green, blue):
+def solidcolor(strip, red, green, blue):
   for led in range(strip.led_count):
     strip.setPixelColor(led, red, green, blue)
   strip.show()
 
 def off(strip):
-  for led in range(strip.led_count):
-    strip.setPixelColor(led, 0, 0, 0)
-  strip.show()
+  solidcolor(strip, 0, 0, 0)
 
 def wheel(angle):
+  """Helper function for the rainbows"""
   if angle / 128 == 0:
     r = 127 - angle % 128    # Red down
     g = angle % 128          # Green up
