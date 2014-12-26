@@ -12,6 +12,8 @@ class LPD8806(object):
     self.port = port
     self.led_count = led_count
     self.leds = {}
+    self.version = 1
+    self.magic = 'LP'
 
   def setPixelColor(self, led, red, green, blue):
     """Sets the red, green and blue levels for a particular pixel."""
@@ -20,6 +22,9 @@ class LPD8806(object):
   def show(self):
     """Writes out all pixels to the ethernet listener."""
     output = []
+    output.append(self.magic)
+    output.append(str(self.version))
+
     for led in range(self.led_count):
       try:
         for channel in self.leds[led]:

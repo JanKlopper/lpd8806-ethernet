@@ -13,6 +13,7 @@ const char* ledtypes[4] = {"lpd8806", "ws2812", "singlecolor" ,"multicolor"};
 const int ledCount = 160;
 const byte ledpins[3] = {3, 6, 9}; // 3 single color leds or 1 rgb strip
 const byte ver = 1;
+const char protocolmagic[] = "LP";
 
 const char http_OK[] PROGMEM =
     "HTTP/1.0 200 OK\r\n"
@@ -93,10 +94,10 @@ void loop () {
     } else if (strncmp("GET /c?", data, 7) == 0){
       saveConfigPage(data, bfill);  
       ether.httpServerReply(bfill.position());  
-    } else {
+    } else if (strncmp("LP1 ", data, 3) == 0){
       ledstep = 0;
       len -= frameHeader;
-      for (int i = 0; i < len; ++i)
+      for (int i = 3; i < len; ++i)
         stripChannelColor(Ethernet::buffer[pos + i]);
       stripLatch(ledType);    
       ether.httpServerReply(0); // Close connection
