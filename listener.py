@@ -24,25 +24,30 @@ class ServerStrip(combined.CombinedStrip):
         db=options.mysqldatabase)
     self.minsleep = 0.01
     self.sleep = 0.1
-    self.maxsleep = 2
+    self.maxsleep = 4
 
   def Run(self):
     currentEffect = self.FetchMessage()
     if currentEffect:
       self.effect = currentEffect
+      print 'Sending effect: %s' % self.effect['effect']
       try:
         effect = getattr(combined.colors.effects, self.effect['effect'])
       except AttributeError:
         print 'unknown effect: %s' % self.effect['effect']
         return
       self.sleep = self.minsleep
-      if self.effect['arguments']:     
-        effect(self, *self.effect['arguments'])
+      if self.effect['arguments']:
+        print 'adding arguments %r' % self.effect['arguments']
+        effect(self, **self.effect['arguments'])
       else:
         effect(self)
     else:
       time.sleep(self.sleep) 
       self.sleep = min(self.sleep * 2, self.maxsleep)
+      if self.sleep == self.maxsleep: # resed last frame every maxsleep if idle
+        for strip in self._strips:
+          strip.show()
 
   def FetchMessage(self, checkCancel=False):
     cursor = self.connection.cursor()
@@ -50,7 +55,7 @@ class ServerStrip(combined.CombinedStrip):
     if checkCancel:
       conditions = 'and cancelprevious = 1'
 
-    cursor.execute("SELECT * FROM `effects` where id>%d %s" % (
+    cursor.execute("SELECT * FROM `effectLog` where id>%d %s" % (
         self.effect['ID'], conditions))
     self.connection.commit()
     row = cursor.fetchone()
@@ -64,26 +69,19 @@ class ServerStrip(combined.CombinedStrip):
       return False
                
   def ParseArguments(self, inputString):
-    if inputString	 and inputString != '':
-      row = simplejson.loads(inputString)
-      newrow = []
-      for column in row:
-        try:
-          if ',' in column:
-            column = float(column)
-          else:
-            column = int(column)
-        except:
-          pass
-        newrow.append(column)
-      return newrow
+    if inputString and inputString != '':
+      arguments = simplejson.loads(inputString)
+      strarguments = {}
+      for key in arguments:        
+        strarguments[str(key)] = arguments[key]
+      return strarguments
     return None
 
   def show(self):
     """Write out to all strips"""
     effect = self.FetchMessage(True)
     if effect and effect['cancelPrevious']:
-      print 'canceling previous effect'
+      print 'canceling currently running effect'
       self.currentEffect = effect
       raise CancelEffect
     #print 'effect ID %d' % self.effect['ID']

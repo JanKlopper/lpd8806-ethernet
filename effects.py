@@ -5,7 +5,7 @@
 import time
 import random
 
-def colorChase(strip, r, g, b, delay=0.2):
+def colorChase(strip, red, green, blue, delay=0.2):
   """Chase one dot down the full strip."""
   # Start by turning all pixels off:
   for led in range(strip.led_count):
@@ -13,16 +13,16 @@ def colorChase(strip, r, g, b, delay=0.2):
 
   # Then display one pixel at a time:
   for led in range(strip.led_count):
-    strip.setPixelColor(led, r, g, b) # Set new pixel 'on'
+    strip.setPixelColor(led, red, green, blue) # Set new pixel 'on'
     strip.show()                      # Refresh LED states
     strip.setPixelColor(led, 0, 0, 0) # Erase pixel, but don't refresh!
     time.sleep(delay)
   strip.show() # Refresh to turn off last pixel
 
-def colorWipe(strip, r, g, b, delay=0.2):
+def colorWipe(strip, red, green, blue, delay=0.2):
   """Fills the strip from begin to end with a single color."""
   for led in range(strip.led_count):
-    strip.setPixelColor(led, r, g, b)
+    strip.setPixelColor(led,red, green, blue)
     strip.show()
     time.sleep(delay)
 
@@ -48,10 +48,10 @@ def rainbow(strip):
       strip.setPixelColor(led, *colors)
     strip.show()
 
-def rainbowCycle(strip, repeats=5):
+def rainbowCycle(strip, cycles=5):
   """Perform a quick rainbow cycle"""
-  if repeats > 0: 
-    for _repeat in range(repeats):
+  if cycles > 0:
+    for _repeat in range(cycles):
       rainbow(strip)
   else:
     while True:
