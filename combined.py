@@ -19,7 +19,15 @@ class CombinedStrip(object):
       self.led_count = self.led_count + strip['led_count']
       self._strips.append(colors.LPD8806(strip['host'],
                                          strip['port'],
-                                         strip['led_count']))
+                                         strip['led_count'],
+                                         strip['byte_order']))
+
+  def getPixelColor(self, led):
+    for strip in self._strips:
+      try:
+        return strip.getPixelColor(led)
+      except KeyError:
+        led = led - strip.led_count
 
   def setPixelColor(self, led, red, green, blue):
     """Sets the red, green and blue levels for a particular pixel."""

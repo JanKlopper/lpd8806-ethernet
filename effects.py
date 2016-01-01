@@ -4,6 +4,7 @@
 # Standard imports
 import time
 import random
+import math
 
 def colorChase(strip, red, green, blue, delay=0.2):
   """Chase one dot down the full strip."""
@@ -23,6 +24,83 @@ def colorWipe(strip, red, green, blue, delay=0.2):
   """Fills the strip from begin to end with a single color."""
   for led in range(strip.led_count):
     strip.setPixelColor(led,red, green, blue)
+    strip.show()
+    time.sleep(delay)
+
+def pilars(strip, red, green, blue):
+  """Fills the strip at the pilar possitions with a single color."""
+  off(strip)
+  for led in range(51, 61):
+    strip.setPixelColor(led,red, green, blue)
+  for led in range(164, 175):
+    strip.setPixelColor(led,red, green, blue)
+  for led in range(216, 227):
+    strip.setPixelColor(led,red, green, blue)
+  strip.show()
+
+def plants(strip, red, green, blue):
+  """Fills the strip at the plant positions with a single color."""
+  off(strip)
+  for led in range(164, 175):
+    strip.setPixelColor(led,red, green, blue)
+  for led in range(216, 227):
+    strip.setPixelColor(led,red, green, blue)
+  strip.show()
+
+def twinkle(strip, red, green, blue, amount, delay=0.05):
+  off(strip)
+  prevamount = 0
+  levels = (0,0,2,2,2,2,4,8)
+  while True:
+    # gradually ease in enough leds
+    randoms = random.sample(xrange(strip.led_count),
+                            int(((amount+1) - prevamount) / 2))
+    # pick the start color and make it even
+    startred = 5
+    startgreen = 5
+    startblue = 5
+    prevamount = 0
+
+    for led in range(strip.led_count):
+      # add a new led
+      if led in randoms:
+        prevamount = prevamount + 1
+        strip.setPixelColor(led, startred, startgreen, startblue)
+
+      # check all leds to see if they are lit up, and either go up, or down
+      currentlevel = strip.getPixelColor(led)
+      if currentlevel:
+        #print led, currentlevel
+        change = random.choice(levels)
+
+        # if the currentlevel is odd, we need to increase the intensity,
+        # untill we hit the max
+        if currentlevel[0] % 2:
+          prevamount = prevamount + 1
+          if (currentlevel[0]+change) <= red:
+           # print 'up for %d = %d' % (led, currentlevel[0])
+            strip.setPixelColor(led,
+                min(currentlevel[0]+change, 255),
+                min(currentlevel[1]+change, 255),
+                min(currentlevel[2]+change, 255))
+          else:
+            #print 'inverse for %d = %d' % (led, currentlevel[0])
+            strip.setPixelColor(led,
+                currentlevel[0]+1,
+                currentlevel[1]+1,
+                currentlevel[2]+1)
+        elif currentlevel[0] > 0:
+          # else decrease the color to 0
+          if currentlevel[0]-4 >= 0:
+            prevamount = prevamount + 1
+            #print 'down for %d = %d' % (led, currentlevel[0])
+            strip.setPixelColor(led,
+                max(0, currentlevel[0]-change),
+                max(0, currentlevel[1]-change),
+                max(0, currentlevel[2]-change))
+          else:
+            #print 'off for %d = %d' % (led, currentlevel[0])
+            strip.setPixelColor(led, 0 ,0 ,0)
     strip.show()
     time.sleep(delay)
 

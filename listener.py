@@ -55,16 +55,19 @@ class ServerStrip(combined.CombinedStrip):
     if checkCancel:
       conditions = 'and cancelprevious = 1'
 
-    cursor.execute("SELECT * FROM `effectLog` where id>%d %s" % (
-        self.effect['ID'], conditions))
-    self.connection.commit()
-    row = cursor.fetchone()
-    if row:
-      return {'ID': int(row[0]),
-              'effect': row[1],
-              'arguments': self.ParseArguments(row[2]),
-              'dateCreated': row[3],
-              'cancelPrevious': bool(int(row[4]))}
+    try:
+      cursor.execute("SELECT * FROM `effectLog` where id>%d %s" % (
+          self.effect['ID'], conditions))
+      self.connection.commit()
+      row = cursor.fetchone()
+      if row:
+        return {'ID': int(row[0]),
+                'effect': row[1],
+                'arguments': self.ParseArguments(row[2]),
+                'dateCreated': row[3],
+                'cancelPrevious': bool(int(row[4]))}
+    except:
+      return False
     else:
       return False
                
@@ -96,7 +99,7 @@ def main():
   parser = optparse.OptionParser()
   parser.add_option('--hosts', default='192.168.178.210:80:160',
                     help='''comma seperated list of IPs of the LPD8806-Ethernet
-                    devices, ip:host:ledcount,ip:host:ledcount''')
+                    devices, ip:port:ledcount,ip:(port):(ledcount):(led-order)''')
   parser.add_option('-m', '--mysql', default='localhost',
                     help='Mysql server to connect to')
   parser.add_option('-d', '--mysqldatabase', default='lightstrips',
@@ -107,11 +110,18 @@ def main():
   hosts = options.hosts.split(',')
   strips = []
   for host in hosts:
-    host = host.split(':')
+    host = list(host.split(':'))
+    if len(host) == 1:
+      host.append(80)
+    if len(host) == 2:
+      host.append(160)
+    if len(host) == 3:
+      host.append('rgb')
     strips.append({
         'host': host[0],
         'port': int(host[1]),
-        'led_count': int(host[2])})
+        'led_count': int(host[2]),
+        'byte_order': host[3]})
 
   serverstrip = ServerStrip(options, strips)
   while True:
